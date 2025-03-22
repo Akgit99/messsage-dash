@@ -11,18 +11,19 @@ import dotenv from 'dotenv';
 
 
 dotenv.config();
+const mg = process.env.MONGO_URL || 'mongodb://localhost:27017/messaging-app';
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
+    origin: ['https://message-dash-f.vercel.app/','http://localhost:5173', 'http://127.0.0.1:5173'],
     methods: ['GET', 'POST']
   }
 });
 
 const corsOptions = {
-  origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
+  origin: ['https://message-dash-f.vercel.app/','http://localhost:5173', 'http://127.0.0.1:5173'],
   methods: ['GET', 'POST'],
   credentials: true
 };
@@ -40,7 +41,7 @@ app.use('/api/messages', messageRoutes);
 //   .then(() => console.log('Successfully connected to MongoDB'))
 //   .catch(err => console.error('MongoDB connection failed:', err.message));
 
-mongoose.connect(process.env.MONGO_URL, {
+mongoose.connect(`${mg}`, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })
