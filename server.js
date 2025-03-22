@@ -11,19 +11,19 @@ import dotenv from 'dotenv';
 
 
 dotenv.config();
-const mg = process.env.MONGO_URL || 'mongodb://localhost:27017/messaging-app';
+const mg = process.env.MONGO_URL 
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: ['https://message-dash-f.vercel.app/','http://localhost:5173', 'http://127.0.0.1:5173'],
+    origin: ['https://message-dash-f.vercel.app','http://localhost:5173', 'http://127.0.0.1:5173'],
     methods: ['GET', 'POST']
   }
 });
 
 const corsOptions = {
-  origin: ['https://message-dash-f.vercel.app/','http://localhost:5173', 'http://127.0.0.1:5173'],
+  origin: ['https://message-dash-f.vercel.app','http://localhost:5173', 'http://127.0.0.1:5173'],
   methods: ['GET', 'POST'],
   credentials: true
 };
