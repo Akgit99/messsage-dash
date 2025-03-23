@@ -9,9 +9,9 @@ import { Message } from './routes/messages.js';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 
-
 dotenv.config();
 const mg = process.env.MONGO_URL 
+const JWT_SECRET = process.env.JWT_SECRET || 'default_secret_key';
 
 const app = express();
 const server = http.createServer(app);
@@ -41,21 +41,21 @@ app.use('/api/messages', messageRoutes);
 //   .then(() => console.log('Successfully connected to MongoDB'))
 //   .catch(err => console.error('MongoDB connection failed:', err.message));
 
-mongoose.connect(`${mg}`, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
+mongoose.connect(`${mg}`)
   .then(() => console.log('Successfully connected to MongoDB'))
   .catch(err => console.error('MongoDB connection failed:', err.message));
 
 // Socket.IO Authentication Middleware
 io.use((socket, next) => {
+  console.log('Received handshake auth:', socket.handshake.auth);
   const token = socket.handshake.auth.token;
+  console.log('jtokenserver:',JWT_SECRET)
   if (!token) {
     console.error('No token provided in socket handshake');
     return next(new Error('Authentication error: No token'));
   }
-  jwt.verify(token, 'secret_key', (err, decoded) => {
+  jwt.verify(token, JWT_SECRET, (err, decoded) => {
+    console.log('tokenn:', token)
     if (err) {
       console.error('Token verification failed:', err.message);
       return next(new Error('Authentication error: Invalid token'));
@@ -76,32 +76,30 @@ io.on('connection', (socket) => {
 
   socket.on('message', async (msg) => {
     try {
-      console.log('Received message:', msg);
-      
-      // Validate message data
+      console.log('Received message payload:', JSON.stringify(msg, null, 2));
       if (!msg.sender || !msg.recipient || !msg.content) {
         throw new Error('Invalid message format: missing required fields');
       }
-
       const newMessage = new Message(msg);
       const savedMessage = await newMessage.save();
       console.log('Message successfully saved to DB:', savedMessage);
-
       io.to(msg.sender).emit('message', savedMessage);
       if (msg.sender !== msg.recipient) {
         io.to(msg.recipient).emit('message', savedMessage);
       }
     } catch (error) {
-      console.error('Error saving message to DB:', error.message);
+      console.error('Error saving message to DB:', error.stack);
     }
   });
 
-  socket.on('typing', (data) => {
-    socket.to(data.recipient).emit('typing', { userId: data.userId });
+  socket.on('disconnect', (reason) => {
+    console.log('User disconnected:', socket.id, 'Reason:', reason);
   });
 
-  socket.on('disconnect', () => {
-    console.log('User disconnected:', socket.id);
+  // Keep-alive check
+  socket.on('ping', () => {
+    socket.emit('pong');
+    console.log('Ping-pong with:', socket.id);
   });
 });
 
