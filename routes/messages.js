@@ -19,7 +19,7 @@ const router = express.Router();
 // Middleware to verify JWT
 const verifyToken = (req, res, next) => {
   const token = req.headers['authorization'];
-  console.log('Authorization header:', token);
+  //console.log('Authorization header:', token);
   if (!token) {
     console.error('No token provided in request headers');
     return res.status(403).json({ message: 'No token provided' });
@@ -27,7 +27,7 @@ const verifyToken = (req, res, next) => {
   try {
     const decoded = jwt.verify(token.split(' ')[1], process.env.JWT_SECRET || 'default_secret_key');
     req.userId = decoded.userId;
-    console.log('Token verified for user:', req.userId);
+    //console.log('Token verified for user:', req.userId);
     next();
   } catch (error) {
     console.error('Token verification failed:', error.message);
@@ -47,7 +47,7 @@ router.get('/search/:recipientId', verifyToken, async (req, res) => {
       ],
       content: { $regex: query, $options: 'i' }
     }).sort({ timestamp: 1 });
-    console.log(`Found ${messages.length} messages matching search for user ${req.userId} and ${recipientId}`);
+    //console.log(`Found ${messages.length} messages matching search for user ${req.userId} and ${recipientId}`);
     res.json(messages);
   } catch (error) {
     console.error('Error searching messages:', error.message);
@@ -65,7 +65,7 @@ router.get('/:recipientId', verifyToken, async (req, res) => {
         { sender: recipientId, recipient: req.userId }
       ]
     }).sort({ timestamp: 1 });
-    console.log(`Retrieved ${messages.length} messages for user ${req.userId} and ${recipientId}`);
+    //console.log(`Retrieved ${messages.length} messages for user ${req.userId} and ${recipientId}`);
     res.json(messages);
   } catch (error) {
     console.error('Error retrieving messages:', error.message);

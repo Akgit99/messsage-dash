@@ -13,7 +13,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'default_secret_key'; // Use enviro
 router.post('/signup', async (req, res) => {
   try {
     const { username, password } = req.body;
-    console.log('Signup request received:', username, password); // Debug log
+    //console.log('Signup request received:', username, password); // Debug log
 
     if (!username || !password) {
       return res.status(400).json({ message: 'Username and password are required' });
@@ -21,17 +21,17 @@ router.post('/signup', async (req, res) => {
 
     const existingUser = await User.findOne({ username });
     if (existingUser) {
-      console.log('Username already exists:', username);
+     // console.log('Username already exists:', username);
       return res.status(400).json({ message: 'Username already exists' });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    console.log('Hashed password:', hashedPassword); // Debug log
+    //console.log('Hashed password:', hashedPassword); 
 
     const user = new User({ username, password: hashedPassword });
     await user.save();
 
-    console.log('User created successfully:', user);
+    //console.log('User created successfully:', user);
     res.status(201).json({ message: 'User created successfully' });
   } catch (error) {
     console.error('Signup error:', error);
@@ -61,8 +61,8 @@ router.post('/login', async (req, res) => {
 
     const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1h' });
     res.json({ token, userId: user._id });
-    console.log('User logged in and token: ', token)
-    console.log('jwtsecretauth:',JWT_SECRET)
+    // console.log('User logged in and token: ', token)
+    // console.log('jwtsecretauth:',JWT_SECRET)
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ error: error.message });
